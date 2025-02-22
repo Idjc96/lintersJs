@@ -1,6 +1,6 @@
 const fecha = document.querySelector('#fecha');
 const lista = document.querySelector('#lista');
-const imput = document.querySelector('#input');
+const input = document.querySelector('#input');
 const botonEnter = document.querySelector('#enter');
 const check = 'fa-check-circle';
 const uncheck = 'fa-circle';
@@ -62,11 +62,11 @@ botonEnter.addEventListener('click', () => {
   }
   localStorage.setItem('TODO', JSON.stringify(LIST));
   input.value = '';
-  id++;
+  id += 1;
 });
 
 document.addEventListener('keyup', (event) => {
-  if (event.key == 'Enter') {
+  if (event.key === 'Enter') {
     const tarea = input.value;
     if (tarea) {
       agregarTarea(tarea, id, false, false);
@@ -78,8 +78,8 @@ document.addEventListener('keyup', (event) => {
       });
     }
     localStorage.setItem('TODO', JSON.stringify(LIST));
-    input.value = '';
-    id++;
+    input.value = ' ';
+    id += 1;
   }
 });
 
@@ -97,6 +97,12 @@ lista.addEventListener('click', (event) => {
 
 // Local storage get item
 
+function cargarLista(DATA) {
+  DATA.forEach((i) => {
+    agregarTarea(i.nombre, i.id, i.realizado, i.eliminado);
+  });
+}
+
 const data = localStorage.getItem('TODO');
 if (data) {
   LIST = JSON.parse(data);
@@ -105,10 +111,4 @@ if (data) {
 } else {
   LIST = [];
   id = 0;
-}
-
-function cargarLista(DATA) {
-  DATA.forEach((i) => {
-    agregarTarea(i.nombre, i.id, i.realizado, i.eliminado);
-  });
 }
