@@ -8,25 +8,20 @@ const lineThrough = 'line-through';
 let id;
 let LIST;
 
-
-
-
 // Funcion para traer la fecha
 
-const FECHA = new Date()
-fecha.innerHTML = FECHA.toLocaleDateString('es-CO',{weekday:'long',month:'short',day:'numeric'})
+const FECHA = new Date();
+fecha.innerHTML = FECHA.toLocaleDateString('es-CO', { weekday: 'long', month: 'short', day: 'numeric' });
 
 // función agregar tarea
 
 function agregarTarea(tarea, id, realizado, eliminado) {
+  if (eliminado) { return; }
 
-    if (eliminado) {return}
-    
+  const REALIZADO = realizado ? check : uncheck;
+  const LINE = realizado ? lineThrough : '';
 
-    const REALIZADO = realizado ? check : uncheck
-    const LINE = realizado ?lineThrough :''
-
-    const elemento =  `
+  const elemento = `
                         <li id="elemento">
                         <i class="far ${REALIZADO}" data="realizado" id="${id}"></i>
                         <p class="text ${LINE}">${tarea}</p>
@@ -34,89 +29,86 @@ function agregarTarea(tarea, id, realizado, eliminado) {
 
                         </li>
 
-                        `
-    lista.insertAdjacentHTML("beforeend", elemento);  
+                        `;
+  lista.insertAdjacentHTML('beforeend', elemento);
 }
 
-//Funcion de tarea realizada
+// Funcion de tarea realizada
 
 function tareaRealizada(element) {
-    element.classList.toggle(check);
-    element.classList.toggle(uncheck);
-    element.parentNode.querySelector('.text').classList.toggle(lineThrough);
-    LIST[element.id].realizado = LIST[element.id].realizado ? false : true;
+  element.classList.toggle(check);
+  element.classList.toggle(uncheck);
+  element.parentNode.querySelector('.text').classList.toggle(lineThrough);
+  LIST[element.id].realizado = !LIST[element.id].realizado;
 }
 
-//Funcion de tarea eliminada
+// Funcion de tarea eliminada
 
 function tareaEliminada(element) {
-    element.parentNode.parentNode.removeChild(element.parentNode);
-    LIST[element.id].eliminado = true;
+  element.parentNode.parentNode.removeChild(element.parentNode);
+  LIST[element.id].eliminado = true;
 }
 
-botonEnter.addEventListener('click',() => {
-    const tarea = input.value
+botonEnter.addEventListener('click', () => {
+  const tarea = input.value;
+  if (tarea) {
+    agregarTarea(tarea.id, false, false);
+    LIST.push({
+      nombre: tarea,
+      id,
+      realizado: false,
+      eliminado: false,
+    });
+  }
+  localStorage.setItem('TODO', JSON.stringify(LIST));
+  input.value = '';
+  id++;
+});
+
+document.addEventListener('keyup', (event) => {
+  if (event.key == 'Enter') {
+    const tarea = input.value;
     if (tarea) {
-        agregarTarea(tarea.id, false, false)
-        LIST.push({
-            nombre: tarea,
-            id: id,
-            realizado: false,
-            eliminado: false
-        })
+      agregarTarea(tarea, id, false, false);
+      LIST.push({
+        nombre: tarea,
+        id,
+        realizado: false,
+        eliminado: false,
+      });
     }
     localStorage.setItem('TODO', JSON.stringify(LIST));
-    input.value = ''
-    id++
-})
+    input.value = '';
+    id++;
+  }
+});
 
-document.addEventListener('keyup', function (event) {
-    if (event.key == 'Enter') {
-        const tarea = input.value
-        if (tarea) {
-            agregarTarea(tarea, id, false, false)
-            LIST.push({
-                nombre: tarea,
-                id: id,
-                realizado: false,
-                eliminado: false
-            })
-        }
-        localStorage.setItem('TODO', JSON.stringify(LIST));
-        input.value = ''
-        id++
-    }
-})
+lista.addEventListener('click', (event) => {
+  const element = event.target;
+  const elementData = element.attributes.data.value;
 
-lista.addEventListener('click', function (event) {
-    const element = event.target;
-    const elementData = element.attributes.data.value;
-
-    if (elementData === 'realizado') {
-        tareaRealizada(element)
-    }
-    else if (elementData === 'eliminado') {
-        tareaEliminada(element)
-    }
-    localStorage.setItem('TODO', JSON.stringify(LIST));
-
-})
-
+  if (elementData === 'realizado') {
+    tareaRealizada(element);
+  } else if (elementData === 'eliminado') {
+    tareaEliminada(element);
+  }
+  localStorage.setItem('TODO', JSON.stringify(LIST));
+});
 
 // Local storage get item
 
-let data = localStorage.getItem('TODO')
+const data = localStorage.getItem('TODO');
 if (data) {
-    LIST = JSON.parse(data)
-    id = LIST.length
-    cargarLista(LIST)
+  LIST = JSON.parse(data);
+  id = LIST.length;
+  cargarLista(LIST);
 } else {
-    LIST = []
-    id = 0
+  LIST = [];
+  id = 0;
 }
 
 function cargarLista(DATA) {
-    DATA.forEach(function (i) {
-        agregarTarea(i.nombre, i.id, i.realizado, i.eliminado);
-    })
+  DATA.forEach((i) => {
+    agregarTarea(i.nombre, i.id, i.realizado, i.eliminado);
+  });
 }
